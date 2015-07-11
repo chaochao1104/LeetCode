@@ -17,30 +17,32 @@ public class PalindromeLinkedList {
         public boolean isPalindrome(ListNode head) {
             if (head == null) return true;
 
-            ListNode copyOfHead = copy(head);
-            ListNode reversedCopyOfHead = reverse(copyOfHead);
+            if (head.next == null) return true;
 
-            while (head != null) {
-                if (reversedCopyOfHead.val != head.val)
-                    return false;
+            ListNode fast = head;
+            ListNode slow = head;
 
-                reversedCopyOfHead = reversedCopyOfHead.next;
+            while (true) {
+                slow = slow.next;
+                fast = fast.next;
+                if (fast == null)
+                    break;
+
+                fast = fast.next;
+                if (fast == null)
+                    break;
+            }
+
+            ListNode reversedRightHalf = reverse(slow);
+
+            while (reversedRightHalf != null) {
+                if (head.val != reversedRightHalf.val) return false;
+
                 head = head.next;
+                reversedRightHalf = reversedRightHalf.next;
             }
 
             return true;
-        }
-
-        private ListNode copy(ListNode head) {
-            ListNode copyOfHead = new ListNode(head.val);
-            ListNode copyNode = copyOfHead;
-            while (head.next != null) {
-                copyNode.next = new ListNode(head.next.val);
-                copyNode = copyNode.next;
-                head = head.next;
-            }
-
-            return copyOfHead;
         }
 
         private ListNode reverse(ListNode head) {
@@ -77,6 +79,11 @@ public class PalindromeLinkedList {
         return head;
     }
 
+    private ListNode preparePalindrome3() {
+        ListNode head = new ListNode(1);
+        return head;
+    }
+
     private ListNode prepareNotPalindrome1() {
         ListNode head = new ListNode(1);
         head.next = new ListNode(2);
@@ -86,13 +93,21 @@ public class PalindromeLinkedList {
         return head;
     }
 
+    private ListNode prepareNotPalindrome2() {
+        ListNode head = new ListNode(1);
+        head.next = new ListNode(2);
+        return head;
+    }
+
     @Test
     public void testIsPalindrome() {
         Solution solution = new Solution();
         Assert.assertTrue(solution.isPalindrome(preparePalindrome1()));
         Assert.assertTrue(solution.isPalindrome(preparePalindrome2()));
+        Assert.assertTrue(solution.isPalindrome(preparePalindrome3()));
         Assert.assertTrue(solution.isPalindrome(null));
         Assert.assertFalse(solution.isPalindrome(prepareNotPalindrome1()));
+        Assert.assertFalse(solution.isPalindrome(prepareNotPalindrome2()));
     }
 
 }
