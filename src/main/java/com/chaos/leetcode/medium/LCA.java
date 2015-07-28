@@ -21,6 +21,50 @@ public class LCA {
     public class Solution {
 
         public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+            if (exists(p, q))
+                return p;
+
+            if (exists(q, p))
+                return q;
+
+            while (true) {
+                if (p != root)
+                    p = ancestorOfNode(root, p, null);
+
+                if (q != root)
+                    q = ancestorOfNode(root, q, null);
+
+                if (exists(p, q))
+                    return p;
+
+                if (exists(q, p))
+                    return q;
+            }
+        }
+
+        private TreeNode ancestorOfNode(TreeNode root, TreeNode node, TreeNode parent)
+        {
+            if (root == null) {
+                return null;
+            } else if (root.val != node.val) {
+                parent = ancestorOfNode(root.left, node, root);
+                if (parent == null) {
+                    parent = ancestorOfNode(root.right, node, root);
+                }
+            }
+            return parent;
+        }
+
+        private boolean exists(TreeNode root, TreeNode node) {
+            if (root == null)
+                return false;
+            if (root.val == node.val)
+                return true;
+
+            return exists(root.left, node) || exists(root.right, node);
+        }
+
+        public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
             Stack<TreeNode> stackTraceOfP = new Stack<TreeNode>();
             Stack<TreeNode> stackTraceOfQ = new Stack<TreeNode>();
 
@@ -87,9 +131,14 @@ public class LCA {
         TreeNode root = buildTestCase1();
         Solution solution = new Solution();
 
-        TreeNode lca = solution.lowestCommonAncestor(root, new TreeNode(5), new TreeNode(2));
+        TreeNode lca = solution.lowestCommonAncestor2(root, root.left, root.left.right);
         Assert.assertEquals(5, lca.val);
-        lca = solution.lowestCommonAncestor(root, new TreeNode(5), new TreeNode(8));
+        lca = solution.lowestCommonAncestor(root, root.left, root.left.right);
+        Assert.assertEquals(5, lca.val);
+
+        lca = solution.lowestCommonAncestor2(root, root.left, root.right.right);
+        Assert.assertEquals(3, lca.val);
+        solution.lowestCommonAncestor2(root, root.left, root.right.right);
         Assert.assertEquals(3, lca.val);
     }
 }
