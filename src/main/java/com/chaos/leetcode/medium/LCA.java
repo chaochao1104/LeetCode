@@ -42,8 +42,7 @@ public class LCA {
             }
         }
 
-        private TreeNode ancestorOfNode(TreeNode root, TreeNode node, TreeNode parent)
-        {
+        private TreeNode ancestorOfNode(TreeNode root, TreeNode node, TreeNode parent) {
             if (root == null) {
                 return null;
             } else if (root.val != node.val) {
