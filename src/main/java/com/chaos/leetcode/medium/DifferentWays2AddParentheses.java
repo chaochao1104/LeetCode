@@ -1,10 +1,10 @@
 package com.chaos.leetcode.medium;
 
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class DifferentWays2AddParentheses {
 
@@ -14,130 +14,175 @@ public class DifferentWays2AddParentheses {
 
     public static final char PLUS = '+';
 
+    public static final char LEFT_PARENTHESE = '(';
 
-    private void swap(char[] str, int x, int y) {
-        char buf = str[x];
+    public static final char RIGHT_PARENTHESE = ')';
+
+    private Set<String> exprs = new HashSet<String>();
+
+    private void swap(int[] str, int x, int y) {
+        int buf = str[x];
         str[x] = str[y];
         str[y] = buf;
     }
 
-    public void permutation(char[] str, int start) {
-        if (start == str.length - 1) {
-            System.out.println(str);
+    public void permutation(String input, int[] priorities, int start) {
+        if (start == priorities.length - 1) {
+            String expr = addParentheses(input, priorities);
+            exprs.add(expr);
         }
 
-        for (int i = start; i < str.length; i++) {
-            swap(str, i, start);
-            permutation(str, start + 1);
-            swap(str, i, start);
+        for (int i = start; i < priorities.length; i++) {
+            swap(priorities, i, start);
+            permutation(input, priorities, start + 1);
+            swap(priorities, i, start);
         }
 
     }
 
-    public void convert2Array(String expr, List<Integer> numbers, List<Character> operators) {
-        int lastOperatorIdx = -1;
+    private String addParentheses(String input, int[] priorities) {
+        StringBuilder expr = new StringBuilder(input);
+        for (int priority : priorities) {
+            int idxOfOperator = findNthOfOperator(expr, priority);
+            int leftBoundary = findLeftBoundary(expr, idxOfOperator);
+            expr.insert(leftBoundary, LEFT_PARENTHESE);
+            int rightBoundary = findRightBoundary(expr, idxOfOperator + 1);
+            expr.insert(rightBoundary, RIGHT_PARENTHESE);
+        }
+
+        return expr.toString();
+    }
+
+    private int findLeftBoundary(StringBuilder expr, int operatorIdx) {
+        int parentheseBalance = 0;
+        for (int i = operatorIdx - 1; i > -1; i--) {
+            char ch = expr.charAt(i);
+            if (ch == RIGHT_PARENTHESE) {
+                parentheseBalance++;
+            } else if (ch == LEFT_PARENTHESE) {
+                parentheseBalance--;
+            } else if (isOperator(ch)) {
+                if (parentheseBalance == 0) {
+                    return i + 1;
+                }
+            }
+        }
+        return 0;
+    }
+
+    private int findRightBoundary(StringBuilder expr, int operatorIdx) {
+        int parentheseBalance = 0;
+        for (int i = operatorIdx + 1; i < expr.length(); i++) {
+            char ch = expr.charAt(i);
+            if (ch == RIGHT_PARENTHESE) {
+                parentheseBalance++;
+            } else if (ch == LEFT_PARENTHESE) {
+                parentheseBalance--;
+            } else if (isOperator(ch)) {
+                if (parentheseBalance == 0) {
+                    return i;
+                }
+            }
+        }
+        return expr.length();
+    }
+
+    private int findNthOfOperator(StringBuilder expr, int nth) {
+        int occurrence = 0;
         for (int i = 0; i < expr.length(); i++) {
-            char theChar = expr.charAt(i);
-            if (theChar == MULTIPLY || theChar == MINUS || theChar == PLUS) {
-                operators.add(theChar);
-                String number = expr.substring(lastOperatorIdx + 1, i);
-                numbers.add(Integer.valueOf(number));
-                lastOperatorIdx = i;
+            char operator = expr.charAt(i);
+            if (isOperator(operator)) {
+                if (occurrence++ == nth) {
+                    return i;
+                }
             }
         }
-        String number = expr.substring(lastOperatorIdx + 1);
-        numbers.add(Integer.valueOf(number));
+
+        return expr.length();
     }
 
-    static abstract class Node {
-
-        Node left;
-
-        Node right;
-
+    private boolean isOperator(char ch) {
+        return ch == MULTIPLY || ch == MINUS || ch == PLUS;
     }
 
-    static class OperatorNode extends Node {
-        char operator;
-    }
-
-    static class NumberNode extends Node {
-        int number;
-    }
-
-    public void buildExprTree(List<Integer> numbers, List<Character> operators) {
-        left(null, null, numbers, operators, 0, operators.size() - 1);
-
-    }
-
-    private void left(Node root, Node parent, List<Integer> numbers, List<Character> operators, int optStart, int optEnd) {
-        if (optStart == optEnd) {
-            NumberNode numNode = new NumberNode();
-            numNode.number = numbers.get(optStart);
-            parent.left = numNode;
-            return;
+    private int findLowestPriorityOpt(String expr) {
+        int parentheseBalance = 0;
+        int lowestPbSoFar = Integer.MIN_VALUE;
+        int lowestPriorityOptIdx = 0;
+        for (int i = 0; i < expr.length(); i++) {
+            char ch = expr.charAt(i);
+            if (ch == LEFT_PARENTHESE) {
+                parentheseBalance--;
+            } else if (ch == RIGHT_PARENTHESE) {
+                parentheseBalance++;
+            } else if (isOperator(ch)) {
+                if (parentheseBalance > lowestPbSoFar) {
+                    lowestPbSoFar = parentheseBalance;
+                    lowestPriorityOptIdx = i;
+                }
+            }
         }
 
-        for (int i = optStart; i <= optEnd; i++) {
-            OperatorNode optNode = new OperatorNode();
-            optNode.operator = operators.get(i);
-            if (root == null) {
-                root = optNode;
-            }
-
-            if (parent != null) {
-                parent.left = optNode;
-            }
-
-            left(root, optNode, numbers, operators, optStart, i);
-            right(root, optNode, numbers, operators, i + 1, optEnd);
-        }
-
+        return lowestPriorityOptIdx;
     }
 
-    private void right(Node root, Node parent, List<Integer> numbers, List<Character> operators, int optStart, int optEnd) {
-        if (optStart == optEnd) {
-            NumberNode numNode = new NumberNode();
-            numNode.number = numbers.get(optStart + 1);
-            parent.right = numNode;
-            return;
+    private Integer compute(String expr) {
+        int lowestPriorityOpt = findLowestPriorityOpt(expr);
+
+        if (lowestPriorityOpt == 0) {
+            return Integer.valueOf(expr);
         }
 
-        for (int i = optStart; i <= optEnd; i++) {
-            OperatorNode optNode = new OperatorNode();
-            optNode.operator = operators.get(i);
-            if (root == null) {
-                root = optNode;
-            }
+        char operator = expr.charAt(lowestPriorityOpt);
+        String leftExpr = expr.substring(1, lowestPriorityOpt);
+        String rightExpr = expr.substring(lowestPriorityOpt + 1, expr.length() - 1);
 
-            if (parent != null) {
-                parent.right = optNode;
-            }
+        if (operator == MULTIPLY)
+            return compute(leftExpr) * compute(rightExpr);
+        else if (operator == PLUS)
+            return compute(leftExpr) + compute(rightExpr);
+        else if (operator == MINUS)
+            return compute(leftExpr) - compute(rightExpr);
 
-            if (optStart == i) {
+        throw new IllegalAccessError("operator: " + operator + " at " + lowestPriorityOpt);
+    }
 
-                optNode.left =
-            } else {
-                left(root, optNode, numbers, operators, optStart, i);
+    public List<Integer> diffWaysToCompute(String input) {
+        int operatorNum = 0;
+        for (int i = 0; i < input.length(); i++) {
+            char operator = input.charAt(i);
+            if (isOperator(operator)) {
+                operatorNum++;
             }
-            right(root, optNode, numbers, operators, i + 1, optEnd);
         }
 
+        if (operatorNum == 0) {
+            return Arrays.asList(Integer.valueOf(input));
+        }
+
+        int[] priorities = new int[operatorNum];
+        for (int i = 0; i < operatorNum; i++) {
+            priorities[i] = i;
+        }
+
+        permutation(input, priorities, 0);
+        List<Integer> results = new ArrayList<Integer>();
+
+        for (String expr : exprs) {
+            Integer result = compute(expr);
+            results.add(result);
+        }
+
+        return results;
     }
 
     @Test
     public void testPermutation() {
        DifferentWays2AddParentheses d = new DifferentWays2AddParentheses();
-//        d.permutation("abcdefg".toCharArray(), 0);
+        List<Integer> results = d.diffWaysToCompute("2*3-4*5");
 
-        List<Integer> numbers = new ArrayList<Integer>();
-        List<Character> operators = new ArrayList<Character>();
-        d.convert2Array("2*3-4*5", numbers, operators);
-
-        System.out.println(numbers);
-        System.out.println(operators);
-
-        d.buildExprTree(numbers, operators);
+        List<Integer> expected = Arrays.asList(-34, -14, -10, -10, 10);
+        Assert.assertTrue(expected.containsAll(results) && results.containsAll(expected));
     }
 
 }
