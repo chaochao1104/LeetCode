@@ -147,7 +147,7 @@ public class DifferentWays2AddParentheses {
         throw new IllegalAccessError("operator: " + operator + " at " + lowestPriorityOpt);
     }
 
-    public List<Integer> diffWaysToCompute(String input) {
+    public List<Integer> diffWaysToCompute2(String input) {
         int operatorNum = 0;
         for (int i = 0; i < input.length(); i++) {
             char operator = input.charAt(i);
@@ -176,13 +176,68 @@ public class DifferentWays2AddParentheses {
         return results;
     }
 
+    private boolean isSimpleExpr(String expr) {
+        int operatorCount = 0;
+        for (int i = 0; i <expr.length(); i++) {
+            if (isOperator(expr.charAt(i)))
+                operatorCount++;
+
+            if (operatorCount > 1)
+                return false;
+        }
+
+        return true;
+    }
+
+    private Map<String, List<Integer>> cache = new HashMap<String, List<Integer>>();
+
+    public List<Integer> diffWaysToCompute(String input) {
+        List<Integer> results = null;
+
+        results = cache.get(input);
+        if (results != null)
+            return results;
+
+        results = new ArrayList<Integer>();
+        for (int i = 0; i <input.length(); i++) {
+            char ch = input.charAt(i);
+            if (isOperator(ch)) {
+                List<Integer> leftResults = diffWaysToCompute(input.substring(0, i));
+                List<Integer> rightResults = diffWaysToCompute(input.substring(i + 1));
+                for (Integer leftRes : leftResults) {
+                    for (Integer rightRes : rightResults) {
+                        if (ch == MULTIPLY)
+                            results.add(leftRes * rightRes);
+                        else if (ch == MINUS)
+                            results.add(leftRes - rightRes);
+                        else if (ch == PLUS)
+                            results.add(leftRes + rightRes);
+                    }
+                }
+            }
+        }
+
+        if (results.isEmpty()) {
+            results.add(Integer.valueOf(input));
+        }
+
+        cache.put(input, results);
+        return results;
+    }
+
     @Test
     public void testPermutation() {
        DifferentWays2AddParentheses d = new DifferentWays2AddParentheses();
         List<Integer> results = d.diffWaysToCompute("2*3-4*5");
 
         List<Integer> expected = Arrays.asList(-34, -14, -10, -10, 10);
-        Assert.assertTrue(expected.containsAll(results) && results.containsAll(expected));
+        List<Integer> resultsCopy = new ArrayList<Integer>(results);
+        List<Integer> expectedCopy = new ArrayList<Integer>(expected);
+
+        resultsCopy.removeAll(expected);
+        Assert.assertEquals(0, resultsCopy.size());
+        expectedCopy.removeAll(results);
+        Assert.assertEquals(0, expectedCopy.size());
     }
 
 }
