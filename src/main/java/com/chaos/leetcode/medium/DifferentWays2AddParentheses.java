@@ -116,7 +116,7 @@ public class DifferentWays2AddParentheses {
 
             if (optStart == i) {
 
-                optNode.left =
+               // optNode.left =
             } else {
                 left(root, optNode, numbers, operators, optStart, i);
             }
