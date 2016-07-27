@@ -9,9 +9,15 @@ public class NQueens {
 
     private long numOfSolution;
 
-    private boolean needPrint = true;
+    private boolean needPrint;
 
-    public NQueens(int n) {
+    public NQueens() {
+    }
+
+    public void setNumberOfQueens(int n) {
+        if (n <= 0) {
+            throw new IllegalArgumentException("n must >= 1");
+        }
         occupied = new int[n];
     }
 
@@ -74,8 +80,9 @@ public class NQueens {
     }
 
     public static void main(String[] args) {
-        NQueens queen = new NQueens(8);
-        //queen.setNeedPrint(false);
+        NQueens queen = new NQueens();
+        queen.setNumberOfQueens(9);
+        queen.setNeedPrint(true);
         queen.backtracking(0);
         System.out.println("total solution:" + queen.getNumOfSolution());
     }
