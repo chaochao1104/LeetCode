@@ -16,17 +16,20 @@ public class CombinationSum {
     private List<List<Integer>> outcome = new ArrayList<List<Integer>>();
 
     private void backtrack(int[] candidates, int start, int target) {
-        if (target < 0) {
-            return;
-        } else if (target == 0) {
-            recordOutcome();
-            return;
-        }
-
         for (int i = start; i < candidates.length; i++) {
-            chosenNos.push(candidates[i]);
-            backtrack(candidates, i, target - candidates[i]);
-            chosenNos.pop();
+            int newTarget = target - candidates[i];
+            if (newTarget > 0) {
+                chosenNos.push(candidates[i]);
+                backtrack(candidates, i, target - candidates[i]);
+                chosenNos.pop();
+            } else if (newTarget < 0) {
+                return;
+            } else {
+                chosenNos.push(candidates[i]);
+                recordOutcome();
+                chosenNos.pop();
+            }
+
         }
     }
 
