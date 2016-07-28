@@ -33,18 +33,20 @@ public class CombinationSum {
                 recordOutcome();
                 lastChosenNoIdx--;
             }
-
         }
     }
 
     private void recordOutcome() {
-        List<Integer> aSolution = Arrays.asList(Arrays.copyOf(chosenNos, lastChosenNoIdx));
+        List<Integer> aSolution = new ArrayList<Integer>(lastChosenNoIdx);
+        for (int i = 0; i < lastChosenNoIdx; i++) {
+            aSolution.add(chosenNos[i]);
+        }
         outcome.add(aSolution);
     }
 
     public List<List<Integer>> combinationSum(int[] candidates, int target) {
         Arrays.sort(candidates);
-        int maxOutComeLen = target / candidates[0] + 1;
+        int maxOutComeLen = target / candidates[0];
         chosenNos = new Integer[maxOutComeLen];
         backtrack(candidates, 0, target);
         return outcome;
