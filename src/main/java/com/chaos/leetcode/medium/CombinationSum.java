@@ -1,7 +1,5 @@
 package com.chaos.leetcode.medium;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
-
 import java.util.*;
 
 /**
@@ -15,47 +13,32 @@ public class CombinationSum {
 
     private Stack<Integer> chosenNos = new Stack<Integer>();
 
-    private Set<List<Integer>> outcome = new HashSet<List<Integer>>();
+    private List<List<Integer>> outcome = new ArrayList<List<Integer>>();
 
-    private int minCand;
-
-    private void backtracking(int[] candidates, int target) {
-        if (target < minCand) {
+    private void backtrack(int[] candidates, int start, int target) {
+        if (target < 0) {
             return;
-        } else if (target == minCand) {
-            chosenNos.push(minCand);
+        } else if (target == 0) {
             recordOutcome();
-            chosenNos.pop();
+            return;
         }
 
-        for (int i = 0; i < candidates.length; i++) {
-            int newTarget = target - candidates[i];
-            if (newTarget > 0) {
-                chosenNos.push(candidates[i]);
-                backtracking(candidates, newTarget);
-                chosenNos.pop();
-            } else if (newTarget == 0) {
-                chosenNos.push(candidates[i]);
-                recordOutcome();
-                chosenNos.pop();
-            }
+        for (int i = start; i < candidates.length; i++) {
+            chosenNos.push(candidates[i]);
+            backtrack(candidates, i, target - candidates[i]);
+            chosenNos.pop();
         }
     }
 
     private void recordOutcome() {
         List<Integer> aSolution = new ArrayList<Integer>(chosenNos);
-        Collections.sort(aSolution);
         outcome.add(aSolution);
     }
 
     public List<List<Integer>> combinationSum(int[] candidates, int target) {
-        for (int cand : candidates) {
-            if (minCand > cand) {
-                minCand = cand;
-            }
-        }
-        backtracking(candidates, target);
-        return new ArrayList<List<Integer>>(outcome);
+        Arrays.sort(candidates);
+        backtrack(candidates, 0, target);
+        return outcome;
     }
 
 
