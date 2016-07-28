@@ -81,10 +81,10 @@ public class NQueens {
 
     public static void main(String[] args) {
         NQueens queen = new NQueens();
-        queen.setNumberOfQueens(9);
+        queen.setNumberOfQueens(15);
         queen.setNeedPrint(true);
         queen.backtracking(0);
-        System.out.println("total solution:" + queen.getNumOfSolution());
+        System.out.println("total solution number:" + queen.getNumOfSolution());
     }
 
 }
