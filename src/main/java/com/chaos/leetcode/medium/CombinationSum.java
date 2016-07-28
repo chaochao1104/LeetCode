@@ -11,7 +11,11 @@ import java.util.*;
  */
 public class CombinationSum {
 
-    private Stack<Integer> chosenNos = new Stack<Integer>();
+    //private Stack<Integer> chosenNos = new Stack<Integer>();
+
+    private Integer[] chosenNos;
+
+    private int lastChosenNoIdx;
 
     private List<List<Integer>> outcome = new ArrayList<List<Integer>>();
 
@@ -19,27 +23,29 @@ public class CombinationSum {
         for (int i = start; i < candidates.length; i++) {
             int newTarget = target - candidates[i];
             if (newTarget > 0) {
-                chosenNos.push(candidates[i]);
+                chosenNos[lastChosenNoIdx++] = candidates[i];
                 backtrack(candidates, i, target - candidates[i]);
-                chosenNos.pop();
+                lastChosenNoIdx--;
             } else if (newTarget < 0) {
                 return;
             } else {
-                chosenNos.push(candidates[i]);
+                chosenNos[lastChosenNoIdx++] = candidates[i];
                 recordOutcome();
-                chosenNos.pop();
+                lastChosenNoIdx--;
             }
 
         }
     }
 
     private void recordOutcome() {
-        List<Integer> aSolution = new ArrayList<Integer>(chosenNos);
+        List<Integer> aSolution = Arrays.asList(Arrays.copyOf(chosenNos, lastChosenNoIdx));
         outcome.add(aSolution);
     }
 
     public List<List<Integer>> combinationSum(int[] candidates, int target) {
         Arrays.sort(candidates);
+        int maxOutComeLen = target / candidates[0] + 1;
+        chosenNos = new Integer[maxOutComeLen];
         backtrack(candidates, 0, target);
         return outcome;
     }
